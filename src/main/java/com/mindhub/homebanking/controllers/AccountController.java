@@ -1,9 +1,8 @@
 package com.mindhub.homebanking.controllers;
 
 import com.mindhub.homebanking.Models.Account;
-import com.mindhub.homebanking.Repositories.AccountRepositories;
+import com.mindhub.homebanking.Repositories.AccountRepository;
 import com.mindhub.homebanking.dtos.AccountDTO;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 
 @RestController
@@ -21,7 +19,7 @@ import java.util.stream.Stream;
 public class AccountController {
 
     @Autowired
-    AccountRepositories accountRepositories;
+    AccountRepository accountRepositories;
 
     @GetMapping("/")
     public ResponseEntity<List<AccountDTO>> getAccounts(){

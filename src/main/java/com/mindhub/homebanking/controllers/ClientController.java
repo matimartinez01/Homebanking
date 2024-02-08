@@ -24,11 +24,9 @@ public class ClientController {
     @Autowired
     ClientRepository clientRepository;
 
-    ClientDTO clientDTO;
-
 
     @GetMapping("/")
-    public ResponseEntity<List<ClientDTO>> getAllClients(){
+    public ResponseEntity<?> getAllClients(){
         List<Client> client = clientRepository.findAll();
         return new ResponseEntity<>(client.stream().map(ClientDTO::new).toList(), HttpStatus.OK);
     }

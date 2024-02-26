@@ -14,7 +14,7 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String firstName, lastName, email;
+    private String firstName, lastName, email, password;
 
     @OneToMany(mappedBy = "client")
     private Set<Account> accounts = new HashSet<>();
@@ -26,12 +26,14 @@ public class Client {
     private Set<Card> cards = new HashSet<>();
 
 
+
     public Client(){};
 
-    public Client(String firstName, String lastName, String email) {
+    public Client(String firstName, String lastName, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.password = password;
     }
     public Long getId() {
         return id;
@@ -61,6 +63,14 @@ public class Client {
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public Set<Account> getAccounts() {
         return accounts;
     }
@@ -84,6 +94,8 @@ public class Client {
     public void setCards(Set<Card> cards) {
         this.cards = cards;
     }
+
+
 
     public void addAccount(Account account){
         account.setClient(this);

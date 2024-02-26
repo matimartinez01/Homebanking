@@ -2,10 +2,12 @@ package com.mindhub.homebanking;
 
 import com.mindhub.homebanking.Models.*;
 import com.mindhub.homebanking.Repositories.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -14,6 +16,9 @@ import java.util.Set;
 @SpringBootApplication
 public class HomebankingApplication {
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	public static void main(String[] args) {
 		SpringApplication.run(HomebankingApplication.class, args);
 	}
@@ -21,14 +26,14 @@ public class HomebankingApplication {
 	@Bean
 	public CommandLineRunner initdata(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository){
 		return args -> {
-			Client client1 = new Client("Melba", "Morel", "melba@mindhub.com");
-			Client client2 = new Client("Matias", "Martinez", "matimartinez@mindhub.com");
+			Client client1 = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("Melba123"));
+			Client client2 = new Client("Matias", "Martinez", "matimartinez@mindhub.com", passwordEncoder.encode("Mati123"));
 
-			Account account1 = new Account("2050", 15.0, LocalDate.now());
-			Account account2 = new Account("5050", 20.0, LocalDate.now());
+			Account account1 = new Account("VIN-00001", 250000.0, LocalDate.now());
+			Account account2 = new Account("VIN-00002", 200000.0, LocalDate.now());
 
-			Transaction transaction1 = new Transaction(10.5, "Hola", LocalDate.now(), TransactionType.Debit);
-			Transaction transaction2 = new Transaction(20.5, "Chau", LocalDate.now(), TransactionType.Credit);
+			Transaction transaction1 = new Transaction(12500.5, "Debit test", LocalDate.now(), TransactionType.Debit);
+			Transaction transaction2 = new Transaction(23500.5, "Credit test", LocalDate.now(), TransactionType.Credit);
 
 			Loan mortgage = new Loan("Mortgage", 500000.0, Set.of(12, 24, 36, 48, 60));
 			Loan personal = new Loan("Personal", 100000.0, Set.of(6, 12, 24));
@@ -43,9 +48,11 @@ public class HomebankingApplication {
 
 			Card card1 = new Card("2040-2011-8888-1010", "123", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.GOLD, CardType.DEBIT);
 			Card card2 = new Card("2209-2022-2606-2011", "345", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.TITANIUM, CardType.CREDIT);
+			Card card3 = new Card("2209-2022-2606-2011", "345", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.SILVER, CardType.CREDIT);
 
 			client1.addCards(card1);
 			client1.addCards(card2);
+			client1.addCards(card3);
 
 
 			mortgage.addClientLoans(clientLoan1);
@@ -86,6 +93,7 @@ public class HomebankingApplication {
 
 			cardRepository.save(card1);
 			cardRepository.save(card2);
+			cardRepository.save(card3);
 
 
 

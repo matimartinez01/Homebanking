@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/api/clients")
 public class ClientController {
 
@@ -39,6 +39,14 @@ public class ClientController {
 
         ClientDTO clientDTO = new ClientDTO(client);
         return new ResponseEntity<>(clientDTO, HttpStatus.OK);
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<?> getClient() {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Client client = clientRepository.findByEmail(userEmail);
+
+        return ResponseEntity.ok(new ClientDTO(client));
     }
 
 }

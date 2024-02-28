@@ -28,8 +28,8 @@ public class WebConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(authorize -> authorize
-                                                            .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
-                                                            .requestMatchers("/api/auth/current").hasRole("CLIENT")
+                                                            .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/test2").permitAll()
+                                                            .requestMatchers("/api/clients/current", "/api/clients/current/accounts", "/api/clients/current/cards").hasRole("CLIENT")
                                                             .anyRequest().hasRole("ADMIN"))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

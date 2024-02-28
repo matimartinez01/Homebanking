@@ -2,6 +2,8 @@ package com.mindhub.homebanking;
 
 import com.mindhub.homebanking.Models.*;
 import com.mindhub.homebanking.Repositories.*;
+import com.mindhub.homebanking.dtos.AccountDTO;
+import com.mindhub.homebanking.dtos.ClientDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -29,8 +31,8 @@ public class HomebankingApplication {
 			Client client1 = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("Melba123"));
 			Client client2 = new Client("Matias", "Martinez", "matimartinez@mindhub.com", passwordEncoder.encode("Mati123"));
 
-			Account account1 = new Account("VIN-00001", 250000.0, LocalDate.now());
-			Account account2 = new Account("VIN-00002", 200000.0, LocalDate.now());
+			Account account1 = new Account("VIN00000001", 250000.0, LocalDate.now());
+			Account account2 = new Account("VIN00000002", 200000.0, LocalDate.now());
 
 			Transaction transaction1 = new Transaction(12500.5, "Debit test", LocalDate.now(), TransactionType.Debit);
 			Transaction transaction2 = new Transaction(23500.5, "Credit test", LocalDate.now(), TransactionType.Credit);
@@ -49,10 +51,13 @@ public class HomebankingApplication {
 			Card card1 = new Card("2040-2011-8888-1010", "123", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.GOLD, CardType.DEBIT);
 			Card card2 = new Card("2209-2022-2606-2011", "345", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.TITANIUM, CardType.CREDIT);
 			Card card3 = new Card("2209-2022-2606-2011", "345", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.SILVER, CardType.CREDIT);
+			Card card4 = new Card("2209-2022-2606-2011", "345", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.SILVER, CardType.DEBIT);
+
 
 			client1.addCards(card1);
 			client1.addCards(card2);
 			client1.addCards(card3);
+			client1.addCards(card4);
 
 
 			mortgage.addClientLoans(clientLoan1);
@@ -65,7 +70,6 @@ public class HomebankingApplication {
 
 			client2.addClientLoans(clientLoan3);
 			client2.addClientLoans(clientLoan4);
-
 
 			account1.addTransactions(transaction1);
 			account1.addTransactions(transaction2);
@@ -94,6 +98,8 @@ public class HomebankingApplication {
 			cardRepository.save(card1);
 			cardRepository.save(card2);
 			cardRepository.save(card3);
+			cardRepository.save(card4);
+
 
 
 

@@ -1,11 +1,15 @@
 package com.mindhub.homebanking.controllers;
 
+import com.mindhub.homebanking.Models.Account;
 import com.mindhub.homebanking.Models.Client;
+import com.mindhub.homebanking.Repositories.AccountRepository;
 import com.mindhub.homebanking.Repositories.ClientRepository;
+import com.mindhub.homebanking.dtos.AccountDTO;
 import com.mindhub.homebanking.dtos.ClientDTO;
 import com.mindhub.homebanking.dtos.LoginDTO;
 import com.mindhub.homebanking.dtos.RegisterDTO;
 import com.mindhub.homebanking.services.JwtUtilService;
+import com.mindhub.homebanking.utils.MathRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,6 +41,12 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private MathRandom mathRandom;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
 
     @PostMapping("/login")
@@ -85,8 +97,21 @@ public class AuthController {
             return ResponseEntity.status(400).body("There is an account with that email");
         }
 
+
         Client newClient = new Client(registerDTO.firstName(), registerDTO.lastName(), registerDTO.email(), passwordEncoder.encode(registerDTO.password()));
+
+        String number = mathRandom.getAccountNumber();
+
+        while (accountRepository.findByNumber(number) != null){
+            number = mathRandom.getAccountNumber();
+        }
+
+
+        Account account = new Account(number, 0.0, LocalDate.now());
+        newClient.addAccount(account);
         clientRepository.save(newClient);
+        accountRepository.save(account);
+
         return new ResponseEntity<>("Created", HttpStatus.CREATED);
 
     }
@@ -97,12 +122,14 @@ public class AuthController {
         return ResponseEntity.ok("Hello " + mail);
     }
 
-    @GetMapping("/current")
-    public ResponseEntity<?> getClient() {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Client client = clientRepository.findByEmail(userEmail);
-
-        return ResponseEntity.ok(new ClientDTO(client));
+    @GetMapping("/test2")
+    public ResponseEntity<?> test2(){
+        Account account = accountRepository.findByNumber("VIN-00001");
+        AccountDTO client2 = new AccountDTO(account);
+        return ResponseEntity.ok(client2);
     }
+
+
+
 
 }

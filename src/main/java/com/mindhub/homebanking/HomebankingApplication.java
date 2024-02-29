@@ -33,20 +33,14 @@ public class HomebankingApplication {
 
 			Account account1 = new Account("VIN00000001", 250000.0, LocalDate.now());
 			Account account2 = new Account("VIN00000002", 200000.0, LocalDate.now());
-
-			Transaction transaction1 = new Transaction(12500.5, "Debit test", LocalDate.now(), TransactionType.Debit);
-			Transaction transaction2 = new Transaction(23500.5, "Credit test", LocalDate.now(), TransactionType.Credit);
+			Account account3 = new Account("VIN00000003", 200000.0, LocalDate.now());
 
 			Loan mortgage = new Loan("Mortgage", 500000.0, Set.of(12, 24, 36, 48, 60));
 			Loan personal = new Loan("Personal", 100000.0, Set.of(6, 12, 24));
 			Loan automotive = new Loan("Automotive", 300000.0, Set.of(6, 12, 24, 36));
 
-			ClientLoan clientLoan1 = new ClientLoan(400000.0, 60, client1, mortgage);
-			ClientLoan clientLoan2 = new ClientLoan(50000.0, 12, client1, personal);
 
 
-			ClientLoan clientLoan3 = new ClientLoan(100000.0, 24, client2, personal);
-			ClientLoan clientLoan4 = new ClientLoan(200000.0, 36, client2, automotive);
 
 			Card card1 = new Card("2040-2011-8888-1010", "123", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.GOLD, CardType.DEBIT);
 			Card card2 = new Card("2209-2022-2606-2011", "345", LocalDate.now(), LocalDate.now().plusYears(5), CardColor.TITANIUM, CardType.CREDIT);
@@ -60,45 +54,30 @@ public class HomebankingApplication {
 			client1.addCards(card4);
 
 
-			mortgage.addClientLoans(clientLoan1);
-			personal.addClientLoans(clientLoan2);
-			personal.addClientLoans(clientLoan3);
-			automotive.addClientLoans(clientLoan4);
-
-			client1.addClientLoans(clientLoan1);
-			client1.addClientLoans(clientLoan2);
-
-			client2.addClientLoans(clientLoan3);
-			client2.addClientLoans(clientLoan4);
-
-			account1.addTransactions(transaction1);
-			account1.addTransactions(transaction2);
-
 			client1.addAccount(account1);
 			client1.addAccount(account2);
+			client2.addAccount(account3);
+
 
 			clientRepository.save(client1);
 			clientRepository.save(client2);
 
 			accountRepository.save(account1);
 			accountRepository.save(account2);
-
-			transactionRepository.save(transaction1);
-			transactionRepository.save(transaction2);
+			accountRepository.save(account3);
 
 			loanRepository.save(mortgage);
 			loanRepository.save(personal);
 			loanRepository.save(automotive);
 
-			clientLoanRepository.save(clientLoan1);
-			clientLoanRepository.save(clientLoan2);
-			clientLoanRepository.save(clientLoan3);
-			clientLoanRepository.save(clientLoan4);
+
 
 			cardRepository.save(card1);
 			cardRepository.save(card2);
 			cardRepository.save(card3);
 			cardRepository.save(card4);
+
+
 
 
 

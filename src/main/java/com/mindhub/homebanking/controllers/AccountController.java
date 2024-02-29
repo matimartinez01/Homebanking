@@ -32,22 +32,6 @@ public class AccountController {
     @Autowired
     MathRandom mathRandom;
 
-    @GetMapping("/")
-    public ResponseEntity<List<AccountDTO>> getAccounts2(){
-        List<AccountDTO> accountsDTO = accountRepository.findAll().stream().map(AccountDTO::new).toList();
-        return new ResponseEntity<>(accountsDTO, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<AccountDTO> getAccountByID(@PathVariable Long id){
-        Account account = accountRepository.findById(id).orElse(null);
-        if(account == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        AccountDTO accountDTO = new AccountDTO(account);
-        return new ResponseEntity<>(accountDTO, HttpStatus.OK);
-    }
-
     @PostMapping("/clients/current/accounts")
     public ResponseEntity<?> addAccount() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();

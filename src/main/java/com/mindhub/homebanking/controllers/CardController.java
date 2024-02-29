@@ -1,10 +1,7 @@
 package com.mindhub.homebanking.controllers;
 
 
-import com.mindhub.homebanking.Models.Account;
-import com.mindhub.homebanking.Models.Card;
-import com.mindhub.homebanking.Models.CardType;
-import com.mindhub.homebanking.Models.Client;
+import com.mindhub.homebanking.Models.*;
 import com.mindhub.homebanking.Repositories.CardRepository;
 import com.mindhub.homebanking.Repositories.ClientRepository;
 import com.mindhub.homebanking.dtos.AccountDTO;
@@ -44,7 +41,27 @@ public class CardController {
         Set<Card> cards = new HashSet<>();
         cards = client.getCards();
 
-        List <Boolean> cardsTypeColor = cards.stream().map(card -> card.getCardType() == cardRequestDTO.cardType() && card.getCardColor() == cardRequestDTO.cardColor()).toList();
+
+        if (cardRequestDTO.cardColor().isBlank()){
+            return new ResponseEntity<>("You have to complete the field 'cardColor'", HttpStatus.FORBIDDEN);
+        }
+
+        if(!cardRequestDTO.cardColor().equals("TITANIUM") && !cardRequestDTO.cardColor().equals("GOLD") && !cardRequestDTO.cardColor().equals("SILVER")){
+            return new ResponseEntity<>("The colors of the card you can choose are: TITANIUM, SILVER or GOLD", HttpStatus.FORBIDDEN);
+        }
+
+        if (cardRequestDTO.cardType().isBlank()){
+            return new ResponseEntity<>("You have to complete the field 'cardType'", HttpStatus.FORBIDDEN);
+        }
+
+        if(!cardRequestDTO.cardType().equals("DEBIT") && !cardRequestDTO.cardType().equals("CREDIT")){
+            return new ResponseEntity<>("The type of the card you can choose are: CREDIT or DEBIT", HttpStatus.FORBIDDEN);
+        }
+
+
+        CardColor cardColor = CardColor.valueOf(cardRequestDTO.cardColor());
+        CardType cardType = CardType.valueOf(cardRequestDTO.cardType());
+        List <Boolean> cardsTypeColor = cards.stream().map(card -> card.getCardType() == cardType && card.getCardColor() == cardColor).toList();
 
         if(cardsTypeColor.contains(true)){
             return new ResponseEntity<>("You already have one card with type " + cardRequestDTO.cardType() + " and color " + cardRequestDTO.cardColor(), HttpStatus.FORBIDDEN);
@@ -56,14 +73,14 @@ public class CardController {
             number = mathRandom.getNumberCard();
         }
 
-        Card card = new Card(number, mathRandom.getCvv(), LocalDate.now(), LocalDate.now().plusYears(5), cardRequestDTO.cardColor(), cardRequestDTO.cardType());
+        Card card = new Card(number, mathRandom.getCvv(), LocalDate.now(), LocalDate.now().plusYears(5), cardColor, cardType);
 
         cardRepository.save(card);
         client.addCards(card);
         clientRepository.save(client);
 
 
-        return new ResponseEntity<>(cards.stream().map(CardDTO::new).toList(), HttpStatus.CREATED);
+        return new ResponseEntity<>("CREATED", HttpStatus.CREATED);
     }
 
 

@@ -1,4 +1,4 @@
-package com.mindhub.homebanking.services;
+package com.mindhub.homebanking.SecurityServices;
 
 import com.mindhub.homebanking.Repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;

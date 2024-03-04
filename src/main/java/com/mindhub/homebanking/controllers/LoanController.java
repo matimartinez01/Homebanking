@@ -5,6 +5,8 @@ import com.mindhub.homebanking.Repositories.*;
 import com.mindhub.homebanking.dtos.ClientLoanDTO;
 import com.mindhub.homebanking.dtos.LoanApplicationDTO;
 import com.mindhub.homebanking.dtos.LoanDTO;
+import com.mindhub.homebanking.services.implementsService.AccountServiceImplement;
+import com.mindhub.homebanking.services.implementsService.ClientServiceImplement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,11 @@ public class LoanController {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    AccountServiceImplement accountServiceImplement;
+
+    @Autowired
+    ClientServiceImplement clientServiceImplement;
 
     @Transactional
     @PostMapping("/clients/current/loan")
@@ -41,8 +48,7 @@ public class LoanController {
 
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Client client = clientRepository.findByEmail(userEmail);
-        List<String> clientAccounts = client.getAccounts().stream().map(account -> account.getNumber()).toList();
-        List<LoanDTO> loans = loanRepositories.findAll().stream().map(LoanDTO::new).toList();
+        List<String> clientAccounts = accountServiceImplement.getAccountsNumber(client);
         Loan loan = loanRepositories.findById(loanApplicationDTO.loanID()).orElse(null);
 
 
@@ -55,7 +61,8 @@ public class LoanController {
             return new ResponseEntity<>("You have to complete the field 'amount' with a number larger than 0", HttpStatus.FORBIDDEN);
         }
 
-        if(loanApplicationDTO.payments() == null || loanApplicationDTO.payments() <= 0){
+        //Tiene sentido? Es un select en el front
+        if(loanApplicationDTO.payments() <= 0){
             return new ResponseEntity<>("You have to complete the field 'payments' and larger than 0", HttpStatus.FORBIDDEN);
         }
 
@@ -63,6 +70,7 @@ public class LoanController {
             return new ResponseEntity<>("You have to complete the field 'accountDestination'", HttpStatus.FORBIDDEN);
         }
 
+        //Tiene sentido? Es un select en el front
         if(loan == null){
             return new ResponseEntity<>("There isn't any loan with the id " + loanApplicationDTO.loanID(), HttpStatus.FORBIDDEN);
         }
@@ -75,10 +83,8 @@ public class LoanController {
             return new ResponseEntity<>("The payments available in the loan " + loan.getName() + " are" + loan.getPayments(), HttpStatus.FORBIDDEN);
         }
 
-        //Está bien o debería decir que no se puede a esa cuenta directamente
         if(accountRepository.findByNumber(loanApplicationDTO.accountDestination()) == null){
-            return new ResponseEntity<>("The account " + loanApplicationDTO.accountDestination() + " doesn't exist", HttpStatus.FORBIDDEN);
-
+            return new ResponseEntity<>("The account is invalid", HttpStatus.FORBIDDEN);
         }
 
         if(!clientAccounts.contains(loanApplicationDTO.accountDestination())){
@@ -97,9 +103,9 @@ public class LoanController {
         account.setBalance(account.getBalance() + loanApplicationDTO.amount());
 
         transactionRepository.save(transaction);
-        accountRepository.save(account);
+        accountServiceImplement.saveAccount(account);
         clientLoanRepository.save(clientLoan);
-        clientRepository.save(client);
+        clientServiceImplement.saveClient(client);
         loanRepositories.save(loan);
 
         return new ResponseEntity<>("CREATED", HttpStatus.CREATED);

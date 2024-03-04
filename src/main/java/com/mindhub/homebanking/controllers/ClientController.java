@@ -3,6 +3,7 @@ package com.mindhub.homebanking.controllers;
 import com.mindhub.homebanking.Models.Client;
 import com.mindhub.homebanking.Repositories.ClientRepository;
 import com.mindhub.homebanking.dtos.ClientDTO;
+import com.mindhub.homebanking.services.implementsService.ClientServiceImplement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,32 +21,29 @@ import static java.util.stream.Collectors.toList;
 public class ClientController {
 
     @Autowired
-    ClientRepository clientRepository;
+    ClientServiceImplement clientServiceImplement;
 
 
     @GetMapping("/")
     public ResponseEntity<?> getAllClients(){
-        List<Client> client = clientRepository.findAll();
-        return new ResponseEntity<>(client.stream().map(ClientDTO::new).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(clientServiceImplement.getAllClientsDTO(), HttpStatus.OK);
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<ClientDTO> getOneClientById(@PathVariable Long id){
-        Client client = clientRepository.findById(id).orElse(null);
+        Client client = clientServiceImplement.getClientById(id);
         if (client == null) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
 
-        ClientDTO clientDTO = new ClientDTO(client);
-        return new ResponseEntity<>(clientDTO, HttpStatus.OK);
+        return new ResponseEntity<>(new ClientDTO(client), HttpStatus.OK);
     }
 
     @GetMapping("/current")
     public ResponseEntity<?> getClient() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Client client = clientRepository.findByEmail(userEmail);
-
+        Client client = clientServiceImplement.getClientByEmail(userEmail);
         return ResponseEntity.ok(new ClientDTO(client));
     }
 

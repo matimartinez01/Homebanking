@@ -5,6 +5,7 @@ import com.mindhub.homebanking.Models.Client;
 import com.mindhub.homebanking.Repositories.AccountRepository;
 import com.mindhub.homebanking.Repositories.ClientRepository;
 import com.mindhub.homebanking.dtos.AccountDTO;
+import com.mindhub.homebanking.services.implementsService.AccountServiceImplement;
 import com.mindhub.homebanking.utils.MathRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,20 +33,20 @@ public class AccountController {
     @Autowired
     MathRandom mathRandom;
 
+    @Autowired
+    AccountServiceImplement accountServiceImplement;
+
     @PostMapping("/clients/current/accounts")
     public ResponseEntity<?> addAccount() {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Client client = clientRepository.findByEmail(userEmail);
         List<Account> accounts = new ArrayList<>();
-        accounts = client.getAccounts().stream().toList();
+        accounts = accountServiceImplement.getAccounts(client);
 
         if (accounts.size() < 3){
-            String number = mathRandom.getAccountNumber();
-            while (accountRepository.findByNumber(number) != null){
-                number = mathRandom.getAccountNumber();
-            }
+            String number = accountServiceImplement.generateAccountNumber();
             Account account = new Account(number, 0.0, LocalDate.now());
-            accountRepository.save(account);
+            accountServiceImplement.saveAccount(account);
             client.addAccount(account);
             clientRepository.save(client);
             return new ResponseEntity<>("Account created" ,HttpStatus.CREATED);

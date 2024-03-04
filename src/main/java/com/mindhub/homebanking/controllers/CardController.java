@@ -7,6 +7,8 @@ import com.mindhub.homebanking.Repositories.ClientRepository;
 import com.mindhub.homebanking.dtos.AccountDTO;
 import com.mindhub.homebanking.dtos.CardDTO;
 import com.mindhub.homebanking.dtos.CardRequestDTO;
+import com.mindhub.homebanking.services.implementsService.CardServiceImplement;
+import com.mindhub.homebanking.services.implementsService.ClientServiceImplement;
 import com.mindhub.homebanking.utils.MathRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,22 +26,26 @@ import java.util.Set;
 @RequestMapping("/api/")
 public class CardController {
 
-    @Autowired
-    ClientRepository clientRepository;
+    //@Autowired
+    //ClientRepository clientRepository;
 
     @Autowired
     CardRepository cardRepository;
 
+
+
     @Autowired
-    MathRandom mathRandom;
+    ClientServiceImplement clientServiceImplement;
+
+    @Autowired
+    CardServiceImplement cardServiceImplement;
 
 
     @PostMapping("/clients/current/cards")
     public ResponseEntity<?> addCard(@RequestBody CardRequestDTO cardRequestDTO){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Client client = clientRepository.findByEmail(userEmail);
-        Set<Card> cards = new HashSet<>();
-        cards = client.getCards();
+        Client client = clientServiceImplement.getClientByEmail(userEmail);
+        List<Card> cards = cardServiceImplement.getClientCards(client);
 
 
         if (cardRequestDTO.cardColor().isBlank()){
@@ -59,25 +65,25 @@ public class CardController {
         }
 
 
-        CardColor cardColor = CardColor.valueOf(cardRequestDTO.cardColor());
-        CardType cardType = CardType.valueOf(cardRequestDTO.cardType());
-        List <Boolean> cardsTypeColor = cards.stream().map(card -> card.getCardType() == cardType && card.getCardColor() == cardColor).toList();
+        CardColor cardColor = cardServiceImplement.getCardColor(cardRequestDTO.cardColor());
+        CardType cardType = cardServiceImplement.getCardType(cardRequestDTO.cardType());
+        List <Boolean> cardsTypeColor = cardServiceImplement.cardColorAndCardType(cards, cardColor, cardType);
 
         if(cardsTypeColor.contains(true)){
             return new ResponseEntity<>("You already have one card with type " + cardRequestDTO.cardType() + " and color " + cardRequestDTO.cardColor(), HttpStatus.FORBIDDEN);
         }
 
-        String number = mathRandom.getNumberCard();
+        String number = MathRandom.getNumberCard();
 
         while (cardRepository.findByNumber(number) != null){
-            number = mathRandom.getNumberCard();
+            number = MathRandom.getNumberCard();
         }
 
-        Card card = new Card(number, mathRandom.getCvv(), LocalDate.now(), LocalDate.now().plusYears(5), cardColor, cardType);
+        Card card = new Card(number, MathRandom.getCvv(), LocalDate.now(), LocalDate.now().plusYears(5), cardColor, cardType);
 
-        cardRepository.save(card);
+        cardServiceImplement.cardSave(card);
         client.addCards(card);
-        clientRepository.save(client);
+        clientServiceImplement.saveClient(client);
 
 
         return new ResponseEntity<>("CREATED", HttpStatus.CREATED);
@@ -88,7 +94,7 @@ public class CardController {
     @GetMapping("/clients/current/cards")
     public ResponseEntity<?> getCards(){
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        Client client = clientRepository.findByEmail(userEmail);
+        Client client = clientServiceImplement.getClientByEmail(userEmail);
         Set<Card> cards = new HashSet<>();
         cards = client.getCards();
 

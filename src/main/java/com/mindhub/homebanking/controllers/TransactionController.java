@@ -11,6 +11,7 @@ import com.mindhub.homebanking.dtos.AccountDTO;
 import com.mindhub.homebanking.dtos.ClientDTO;
 import com.mindhub.homebanking.dtos.TransactionDTO;
 import com.mindhub.homebanking.dtos.TransactionRequestDTO;
+import com.mindhub.homebanking.services.implementsService.AccountServiceImplement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,9 @@ public class TransactionController {
     @Autowired
     ClientRepository clientRepository;
 
+    @Autowired
+    AccountServiceImplement accountServiceImplement;
+
 
     @Transactional
     @PostMapping("/clients/current/transactions")
@@ -44,7 +48,7 @@ public class TransactionController {
 
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Client client = clientRepository.findByEmail(userEmail);
-        List<String> accountsClient = client.getAccounts().stream().map(account -> account.getNumber()).toList();
+        List<String> accountsClient = accountServiceImplement.getAccountsNumber(client);
 
 
         if(transactionRequestDTO.destinationAccount().isBlank()){
@@ -68,6 +72,10 @@ public class TransactionController {
             return new ResponseEntity<>("The amount of the transaction has to be more than 0", HttpStatus.FORBIDDEN);
         }
 
+        if (transactionRequestDTO.sourceAccount().equals(transactionRequestDTO.destinationAccount())){
+            return new ResponseEntity<>("The source account needs to be different with the destination account", HttpStatus.FORBIDDEN);
+        }
+
         if (!accountsClient.contains(transactionRequestDTO.sourceAccount())){
             return new ResponseEntity<>("You don't have account with the number: " + transactionRequestDTO.sourceAccount(), HttpStatus.FORBIDDEN);
         }
@@ -79,10 +87,6 @@ public class TransactionController {
         }
 
         Account destinationAccount = accountRepository.findByNumber(transactionRequestDTO.destinationAccount());
-
-        if (transactionRequestDTO.sourceAccount().equals(transactionRequestDTO.destinationAccount())){
-            return new ResponseEntity<>("The source account needs to be different with the destination account", HttpStatus.FORBIDDEN);
-        }
 
         if (transactionRequestDTO.amount() > sourceAccount.getBalance()){
             return new ResponseEntity<>("The account " + sourceAccount.getNumber() + " doesn't have sufficient amounts to make the transaction", HttpStatus.FORBIDDEN);
@@ -98,12 +102,12 @@ public class TransactionController {
 
         transactionRepository.save(transactionSourceAccount);
         transactionRepository.save(transactionDestinationAccount);
-        accountRepository.save(sourceAccount);
-        accountRepository.save(destinationAccount);
+        accountServiceImplement.saveAccount(sourceAccount);
+        accountServiceImplement.saveAccount(destinationAccount);
 
 
 
-        return new ResponseEntity<>("Transaction successfully", HttpStatus.OK);
+        return new ResponseEntity<>("Transaction successful", HttpStatus.OK);
     };
 
     @GetMapping("/clients/current/transactions")

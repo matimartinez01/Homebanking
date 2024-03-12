@@ -28,7 +28,8 @@ public class HomebankingApplication {
 	@Bean
 	public CommandLineRunner initdata(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository){
 		return args -> {
-			/*Client client1 = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("Melba123"));
+			/*
+			Client client1 = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("Melba123"));
 			Client client2 = new Client("Matias", "Martinez", "matimartinez@mindhub.com", passwordEncoder.encode("Mati123"));
 			Client client3 = new Client("Juan", "Perez", "juanperez@mindhub.com", passwordEncoder.encode("Juan123"));
 

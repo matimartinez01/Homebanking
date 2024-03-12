@@ -14,6 +14,8 @@ public class Transaction {
     private Double amount;
     private String description;
     private LocalDate date;
+
+    @Enumerated(EnumType.STRING)
     private TransactionType type;
     @ManyToOne
     @JoinColumn(name = "account_id")

@@ -12,7 +12,11 @@ public class Card {
     private Long id;
     private String number, cvv;
     private LocalDate fromDate, trhuDate;
+
+    @Enumerated(EnumType.STRING)
     private CardColor cardColor;
+
+    @Enumerated(EnumType.STRING)
     private CardType cardType;
 
     private String cardHolder;

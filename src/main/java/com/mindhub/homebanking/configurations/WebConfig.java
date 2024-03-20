@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 public class WebConfig {
@@ -21,14 +22,19 @@ public class WebConfig {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
+    @Autowired
+    private CorsConfigurationSource corsConfigurationSource;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        http.csrf(AbstractHttpConfigurer::disable)
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.frameOptions((HeadersConfigurer.FrameOptionsConfig::disable)))
                 .authorizeHttpRequests(authorize -> authorize
-                                                            .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/test2", "/h2-console/**").permitAll()
+                                                            .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/test2", "/h2-console/**", "/api/loan").permitAll()
                                                             .requestMatchers("/api/clients/current", "/api/clients/current/accounts", "/api/clients/current/cards", "/api/clients/current/transactions", "/api/clients/current/loan").hasRole("CLIENT")
                                                             .anyRequest().hasRole("ADMIN"))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)

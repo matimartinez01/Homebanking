@@ -42,6 +42,12 @@ public class LoanController {
     @Autowired
     ClientServiceImplement clientServiceImplement;
 
+    @GetMapping("/loan")
+    public ResponseEntity<?> getAllLoans(){
+        List<LoanDTO> loans = loanRepositories.findAll().stream().map(LoanDTO::new).toList();
+        return new ResponseEntity<>(loans, HttpStatus.OK);
+    }
+
     @Transactional
     @PostMapping("/clients/current/loan")
     public ResponseEntity<?> addLoan(@RequestBody LoanApplicationDTO loanApplicationDTO){
@@ -87,8 +93,8 @@ public class LoanController {
             return new ResponseEntity<>("The account is invalid", HttpStatus.FORBIDDEN);
         }
 
-        if(!clientAccounts.contains(loanApplicationDTO.accountDestination())){
-            return new ResponseEntity<>("You can't ask a loan for the account " + loanApplicationDTO.accountDestination(), HttpStatus.FORBIDDEN);
+        if(clientLoanRepository.existsClientLoanByLoanAndClient(loan, client)){
+            return new ResponseEntity<>("You already have an active loan of this type" , HttpStatus.FORBIDDEN);
         }
 
         Account account = accountRepository.findByNumber(loanApplicationDTO.accountDestination());
